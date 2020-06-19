@@ -12,15 +12,16 @@ app.get('/location', (request,response) => {
   let data = require('./data/location.json');
   let actualData = new Location(data[0]);
   response.status(200).json(actualData);
+//   console.log('test');
 });
 
 function Location( obj ) {
-  let bob = 'test';
   this.latitude = obj.lat;
   this.longitude = obj.lon;
   this.formatted_query = obj.display_name;
-  this.search_query = bob;
+//   this.search_query = request;
 }
+
 
 
 // app.put(), app.delete(), app.post()
