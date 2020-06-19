@@ -10,16 +10,16 @@ app.use( cors() );
 
 app.get('/location', (request,response) => {
   let data = require('./data/location.json');
-  let actualData = new Location(data[0]);
+  let actualData = new Location(data[0],request.query.city);
   response.status(200).json(actualData);
-//   console.log('test');
+//   console.log(city);
 });
 
-function Location( obj ) {
+function Location( obj, citySearch ) {
   this.latitude = obj.lat;
   this.longitude = obj.lon;
   this.formatted_query = obj.display_name;
-//   this.search_query = request;
+  this.search_query = citySearch;
 }
 
 
@@ -47,23 +47,23 @@ function Weather( obj ) {
 
 
 // $('thing').on('something', () => {})
-app.get('/restaurants', (request, response) => {
-    let data = require('./data/restaurants.json');
+// app.get('/restaurants', (request, response) => {
+//     let data = require('./data/restaurants.json');
   
-    let allRestaurants = [];
-    data.nearby_restaurants.forEach( restObject => {
-      let restaurant = new Restaurant(restObject);
-      allRestaurants.push(restaurant);
-    });
+//     let allRestaurants = [];
+//     data.nearby_restaurants.forEach( restObject => {
+//       let restaurant = new Restaurant(restObject);
+//       allRestaurants.push(restaurant);
+//     });
   
-    response.status(200).json(allRestaurants);
-  });
+//     response.status(200).json(allRestaurants);
+//   });
   
-  function Restaurant(obj) {
-    this.restaurant = obj.restaurant.name;
-    this.locality = obj.restaurant.location.locality;
-    this.cuisines = obj.restaurant.cuisines;
-  }
+//   function Restaurant(obj) {
+//     this.restaurant = obj.restaurant.name;
+//     this.locality = obj.restaurant.location.locality;
+//     this.cuisines = obj.restaurant.cuisines;
+//   }
 
 
 
