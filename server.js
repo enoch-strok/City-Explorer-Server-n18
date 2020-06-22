@@ -1,47 +1,75 @@
 'use strict';
 
+//////Stopped at 2:57:41 for this project on blob:https://frontrowviews.com/b4241a47-ae33-459b-88a1-d203096c3d63   //
+
 // dotenv, express, cors
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const app = express();
-app.use( cors() );
+app.use(cors());
+const superagent = require('superagent');
 
-app.get('/location', (request,response) => {
-  let data = require('./data/location.json');
-  let actualData = new Location(data[0],request.query.city);
-  response.status(200).json(actualData);
-//   console.log(city);
+//-------------HOME----------------------//
+
+app.get('/', (request, response) => {
+    response.send('Hello World...again');
 });
 
-function Location( obj, citySearch ) {
-  this.latitude = obj.lat;
-  this.longitude = obj.lon;
-  this.formatted_query = obj.display_name;
-  this.search_query = citySearch;
+//-------------LOCATION-------------------//
+app.get('/location', (request, response) => {
+    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+
+    superagent.get(API)
+        .then(data => {
+            // console.log(data.body[0], request.query.city);
+            let locationData = new Location(data.body[0], request.query.city);
+            response.status(200).send(locationData);
+        })
+        .catch( () => {
+            response.status(500).send('Something went wrong with your search selection!');
+        })
+
+
+});
+
+function Location(obj, citySearch) {
+    this.latitude = obj.lat;
+    this.longitude = obj.lon;
+    this.formatted_query = obj.display_name;
+    this.search_query = citySearch;
 }
+
+//----------OLD CONSTRUCTOR WHEN USING JSON FAKE DATA OR LOCAL DATA---------------//
+// function Location( obj, citySearch ) {
+//     this.latitude = obj.lat;
+//     this.longitude = obj.lon;
+//     this.formatted_query = obj.display_name;
+//     this.search_query = citySearch;
+//   }
+
 
 
 //--------------WEATHER-------------------//
-app.get('/weather', (request,response) => {
-    let weatherJSONfile = require('./data/weather.json');
-    let allWeather = [];
-    weatherJSONfile.data.forEach( restObject => {
-        // console.log(restObject.weather.description);
-        let weather = new Weather(restObject);
-        // console.log('weather:',weather);
-        allWeather.push(weather);
-    })
-    console.log(allWeather);
-    response.status(200).json(allWeather);
-});
+// app.get('/weather', (request, response) => {
+//     let weatherJSONfile = require('./data/weather.json');
+//     let allWeather = [];
+//     weatherJSONfile.data.forEach(restObject => {
+//         // console.log(restObject.weather.description);
+//         let weather = new Weather(restObject);
+//         // console.log('weather:',weather);
+//         allWeather.push(weather);
+//     })
+//     console.log(allWeather);
+//     response.status(200).json(allWeather);
+// });
 
-function Weather( obj ) {
-    this.forecast = obj.weather.description;
-    this.time = obj.datetime;
-    // this.time = obj.array.rh;
-}
+// function Weather(obj) {
+//     this.forecast = obj.weather.description;
+//     this.time = obj.datetime;
+//     // this.time = obj.array.rh;
+// }
 
 
 
@@ -49,16 +77,16 @@ function Weather( obj ) {
 // $('thing').on('something', () => {})
 // app.get('/restaurants', (request, response) => {
 //     let data = require('./data/restaurants.json');
-  
+
 //     let allRestaurants = [];
 //     data.nearby_restaurants.forEach( restObject => {
 //       let restaurant = new Restaurant(restObject);
 //       allRestaurants.push(restaurant);
 //     });
-  
+
 //     response.status(200).json(allRestaurants);
 //   });
-  
+
 //   function Restaurant(obj) {
 //     this.restaurant = obj.restaurant.name;
 //     this.locality = obj.restaurant.location.locality;
@@ -77,14 +105,13 @@ function Weather( obj ) {
 
 // app.put(), app.delete(), app.post()
 
-app.use('*',(request,response) => {
-    response.status(404).send('not sure what you want?');
+app.use('*', (request, response) => {
+    response.status(404).send('404: Not sure what you want?');
 });
 
 app.use((error, request, response, next) => {
     console.log(error);
-    response.status(500).send('you broke the server');
+    response.status(500).send('500: Minions broke the server somehow...');
 });
 
-app.listen( PORT, () => console.log(`The Server is running on port ${PORT}`));
-
+app.listen(PORT, () => console.log(`The Server is running on port ${PORT}`));

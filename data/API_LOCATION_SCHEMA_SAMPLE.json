@@ -1,0 +1,20 @@
+[
+    {
+        "place_id": "235549103",
+        "licence": "https://locationiq.com/attribution",
+        "osm_type": "relation",
+        "osm_id": "237385",
+        "boundingbox": [
+            "47.4810022",
+            "47.7341357",
+            "-122.459696",
+            "-122.224433"
+        ],
+        "lat": "47.6038321",
+        "lon": "-122.3300624",
+        "display_name": "Seattle, King County, Washington, USA",
+        "class": "place",
+        "type": "city",
+        "importance": 0.77297917356438,
+        "icon": "https://locationiq.org/static/images/mapicons/poi_place_city.p.20.png"
+    },
