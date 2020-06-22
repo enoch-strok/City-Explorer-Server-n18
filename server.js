@@ -49,27 +49,52 @@ function Location(obj, citySearch) {
 //     this.search_query = citySearch;
 //   }
 
+//------------NEW WEATHER API-------------------//
+
+//Starts at 3:05
+
+app.get('/weather', (request, response) => {
+    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+
+    superagent.get(API)
+        .then(data => {
+            // console.log(data.body[0], request.query.city);
+            let allWeatherAPI = [];
+            let locationData = new Location(data.body[0], request.query.city);
+            response.status(200).send(locationData);
+        })
+        .catch( () => {
+            response.status(500).send('Something went wrong with your search selection!');
+        })
 
 
-//--------------WEATHER-------------------//
-// app.get('/weather', (request, response) => {
-//     let weatherJSONfile = require('./data/weather.json');
-//     let allWeather = [];
-//     weatherJSONfile.data.forEach(restObject => {
-//         // console.log(restObject.weather.description);
-//         let weather = new Weather(restObject);
-//         // console.log('weather:',weather);
-//         allWeather.push(weather);
-//     })
-//     console.log(allWeather);
-//     response.status(200).json(allWeather);
-// });
+});
 
-// function Weather(obj) {
-//     this.forecast = obj.weather.description;
-//     this.time = obj.datetime;
-//     // this.time = obj.array.rh;
-// }
+function Weather(obj) {
+    this.forecast = obj.weather.description;
+    this.time = obj.datetime;
+}
+
+
+//--------------OLD WEATHER-------------------//
+app.get('/weather', (request, response) => {
+    let weatherJSONfile = require('./data/weather.json');
+    let allWeather = [];
+    weatherJSONfile.data.forEach(restObject => {
+        // console.log(restObject.weather.description);
+        let weather = new Weather(restObject);
+        // console.log('weather:',weather);
+        allWeather.push(weather);
+    })
+    console.log(allWeather);
+    response.status(200).json(allWeather);
+});
+
+function Weather(obj) {
+    this.forecast = obj.weather.description;
+    this.time = obj.datetime;
+    // this.time = obj.array.rh;
+}
 
 
 
