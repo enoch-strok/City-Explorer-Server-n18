@@ -1,6 +1,6 @@
 'use strict';
 
-//////Stopped at 2:57:41 for this project on blob:https://frontrowviews.com/b4241a47-ae33-459b-88a1-d203096c3d63   //
+//////Stopped at 2:57:41 for this project on https://frontrowviews.com/Home/Event/Details/5ec5bbead28f0a0cf8041762  //
 
 // dotenv, express, cors
 require('dotenv').config();
@@ -30,8 +30,6 @@ app.get('/location', (request, response) => {
         .catch( () => {
             response.status(500).send('Something went wrong with your search selection!');
         })
-
-
 });
 
 function Location(obj, citySearch) {
@@ -53,52 +51,48 @@ function Location(obj, citySearch) {
 
 //Starts at 3:05
 
-app.get('/weather', (request, response) => {
-    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+// app.get('/weather', (request, response) => {
+//     const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
 
-    superagent.get(API)
-        .then(data => {
-            // console.log(data.body[0], request.query.city);
-            let allWeatherAPI = [];
-            let locationData = new Location(data.body[0], request.query.city);
-            response.status(200).send(locationData);
-        })
-        .catch( () => {
-            response.status(500).send('Something went wrong with your search selection!');
-        })
+//     superagent.get(API)
+//         .then(data => {
+//             // console.log(data.body[0], request.query.city);
+//             let allWeatherAPI = [];
+//             let locationData = new Location(data.body[0], request.query.city);
+//             response.status(200).send(locationData);
+//         })
+//         .catch( () => {
+//             response.status(500).send('Something went wrong with your search selection!');
+//         })
 
+// });
 
-});
-
-function Weather(obj) {
-    this.forecast = obj.weather.description;
-    this.time = obj.datetime;
-}
+// function Weather(obj) {
+//     this.forecast = obj.weather.description;
+//     this.time = obj.datetime;
+// }
 
 
 //--------------OLD WEATHER-------------------//
 app.get('/weather', (request, response) => {
     let weatherJSONfile = require('./data/weather.json');
-    let allWeather = [];
-    weatherJSONfile.data.forEach(restObject => {
-        // console.log(restObject.weather.description);
-        let weather = new Weather(restObject);
-        // console.log('weather:',weather);
-        allWeather.push(weather);
-    })
-    console.log(allWeather);
-    response.status(200).json(allWeather);
-});
+        let allWeather = weatherJSONfile.data.map(restObject => {
+            return new Weather(restObject);
+        })
+        console.log(allWeather);
+        response.status(200).json(allWeather);
+    });
+
 
 function Weather(obj) {
     this.forecast = obj.weather.description;
     this.time = obj.datetime;
-    // this.time = obj.array.rh;
 }
 
 
 
 
+//---------------OLD RESTAURANTS-----------------------------//
 // $('thing').on('something', () => {})
 // app.get('/restaurants', (request, response) => {
 //     let data = require('./data/restaurants.json');
@@ -117,15 +111,6 @@ function Weather(obj) {
 //     this.locality = obj.restaurant.location.locality;
 //     this.cuisines = obj.restaurant.cuisines;
 //   }
-
-
-
-
-
-
-
-
-
 
 
 // app.put(), app.delete(), app.post()
