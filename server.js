@@ -10,6 +10,35 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
 const superagent = require('superagent');
+const pg = require('pg');
+const { response } = require('express');
+
+//--------Database Connection Setup--------//
+const client = new pg.Client(process.env.POSTGRES);
+
+//Frontrow: 301n18 6/24/2020 @1:02:34
+
+
+app.get('/add', (request, responst) => {
+//get our data from the front end
+console.log(request.query);
+const firstName = request.query.first_name;
+const lastName = request.query.last_name
+const safeQuery = [firstName, lastName];
+
+//--------Create SQL Query-----------//
+const SQL = 'INSTER INTO users (first_name, last_name) VALUES ($1, $2);'
+
+//--------GIve SQL Query to PG AGENT----------//
+
+client.query(SQL, safeQuery)
+    .then( results => {
+        response.status(200).json(results);
+    })
+    .catch( error => {response.status(500).send(error)});
+
+})
+
 
 //-------------HOME----------------------//
 
