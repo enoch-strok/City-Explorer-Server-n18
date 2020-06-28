@@ -10,6 +10,12 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
 const superagent = require('superagent');
+const { request } = require('express');
+
+//------------Celcius to Farenheit Calc----------//
+function convertToF(celsius) {
+    return celsius * 9/5 + 32;
+};
 
 //-------------HOME----------------------//
 
@@ -23,7 +29,7 @@ app.get('/location', (request, response) => {
 
     superagent.get(API)
         .then(data => {
-            // console.log(data.body[0], request.query.city);
+            console.log(data.body[0], request.query.city);
             let locationData = new Location(data.body[0], request.query.city);
             response.status(200).send(locationData);
         })
@@ -35,7 +41,7 @@ app.get('/location', (request, response) => {
 function Location(obj, citySearch) {
     this.latitude = obj.lat;
     this.longitude = obj.lon;
-    this.formatted_query = obj.display_name;
+    this.formatted_query = obj.display_name +'           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
     this.search_query = citySearch;
 }
 
@@ -74,21 +80,76 @@ function Location(obj, citySearch) {
 
 
 //--------------OLD WEATHER-------------------//
-app.get('/weather', (request, response) => {
-    let weatherJSONfile = require('./data/weather.json');
-        let allWeather = weatherJSONfile.data.map(restObject => {
-            return new Weather(restObject);
-        })
-        console.log(allWeather);
-        response.status(200).json(allWeather);
-    });
+// app.get('/weather', (request, response) => {
+//     let weatherJSONfile = require('./data/weather.json');
+//         let allWeather = weatherJSONfile.data.map(restObject => {
+//             return new Weather(restObject);
+//         })
+//         // console.log(allWeather);
+//         response.status(200).json(allWeather);
+//     });
 
 
-function Weather(obj) {
-    this.forecast = obj.weather.description;
-    this.time = obj.datetime;
-}
+// function Weather(obj) {
+//     this.forecast = obj.weather.description;
+//     this.time = obj.datetime;
+// }
 
+
+//----------NEW WEATHER------------------------//
+// app.get('/weather', (request, response) => {
+    
+//     const lat = request.query.latitude;
+//     const lon= request.query.longitude;
+
+//     //------Today's Date Generator--------//
+//     const today = new Date();
+//     const this_day = String(today.getDate()).padStart(2, '0');
+//     const this_month = String(today.getMonth() + 1).padStart(2, '0');
+//     const this_year = today.getFullYear();
+//     const start_date = this_year + '-' + this_month + '-' + this_day;
+    
+//     let dateArray = []
+//     let i;
+//     for(i = 0; i < 8; i++) {
+//         let d = new Date();
+//         d.setDate(d.getDate() + i);
+//         let end_day = String(d.getDate()).padStart(2, '0');
+//         let end_month = String(d.getMonth() + 1).padStart(2, '0');
+//         let end_year = d.getFullYear();
+//         let end_date = end_year + '-' + end_month + '-' + end_day;
+//         dateArray.push(end_date);
+        
+//     };
+//     console.log(dateArray);
+    
+    //------Future Date Generator----------//
+    // const d = new Date();
+    // d.setDate(d.getDate() + 1);
+    // const end_day = String(d.getDate()).padStart(2, '0');
+    // const end_month = String(d.getMonth() + 1).padStart(2, '0');
+    // const end_year = d.getFullYear();
+    // const end_date = end_year + '-' + end_month + '-' + end_day;
+
+    // console.log('Today\'s Date: ' + start_date);
+    // console.log('+7 Days From Today: ' + end_date);
+
+    
+    //2020-06-25 date format//
+    // const API_Historical = `https://api.weatherbit.io/v2.0/history/daily?&lat=${lat}&lon=${lon}&country=US&start_date=${start_date}&end_date=${end_date}&key=${process.env.WEATHER_API}`   
+    // const API_current(WORKING) = `https://api.weatherbit.io/v2.0/current?&lat=${lat}&lon=${lon}&country=US&start_date=${start_date}&end_date=${end_date}&key=${process.env.WEATHER_API}`
+    // const API = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&country=US&key=${process.env.WEATHER_API}`
+    // superagent.get(API)
+    //     .then(data => {
+
+    //         let weather_description = data.body.data[0].weather.description;
+    //         console.log(weather_description);
+
+                
+    //         } );
+
+
+    //     })
 
 
 
@@ -124,4 +185,4 @@ app.use((error, request, response, next) => {
     response.status(500).send('500: Minions broke the server somehow...');
 });
 
-app.listen(PORT, () => console.log(`The Server is running on port ${PORT}`));
+app.listen(PORT, () => console.log('Server is running on port', PORT));
