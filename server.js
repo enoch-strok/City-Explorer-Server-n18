@@ -29,7 +29,7 @@ app.get('/location', (request, response) => {
 
     superagent.get(API)
         .then(data => {
-            console.log(data.body[0], request.query.city);
+            console.log(data.body[0], request.query.city,'line32');
             let locationData = new Location(data.body[0], request.query.city);
             response.status(200).send(locationData);
         })
@@ -62,7 +62,7 @@ function Location(obj, citySearch) {
 
 //     superagent.get(API)
 //         .then(data => {
-//             // console.log(data.body[0], request.query.city);
+//             console.log(data.body[0], request.query.city, 'line65');
 //             let allWeatherAPI = [];
 //             let locationData = new Location(data.body[0], request.query.city);
 //             response.status(200).send(locationData);
@@ -72,7 +72,7 @@ function Location(obj, citySearch) {
 //         })
 
 // });
-
+// // asdfasdf
 // function Weather(obj) {
 //     this.forecast = obj.weather.description;
 //     this.time = obj.datetime;
@@ -97,10 +97,10 @@ function Location(obj, citySearch) {
 
 
 //----------NEW WEATHER------------------------//
-// app.get('/weather', (request, response) => {
+app.get('/weather', (request, response) => {
     
-//     const lat = request.query.latitude;
-//     const lon= request.query.longitude;
+    const lat = request.query.latitude;
+    const lon= request.query.longitude;
 
 //     //------Today's Date Generator--------//
 //     const today = new Date();
@@ -138,18 +138,18 @@ function Location(obj, citySearch) {
     //2020-06-25 date format//
     // const API_Historical = `https://api.weatherbit.io/v2.0/history/daily?&lat=${lat}&lon=${lon}&country=US&start_date=${start_date}&end_date=${end_date}&key=${process.env.WEATHER_API}`   
     // const API_current(WORKING) = `https://api.weatherbit.io/v2.0/current?&lat=${lat}&lon=${lon}&country=US&start_date=${start_date}&end_date=${end_date}&key=${process.env.WEATHER_API}`
-    // const API = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&country=US&key=${process.env.WEATHER_API}`
-    // superagent.get(API)
-    //     .then(data => {
+    const API = `https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&country=US&key=${process.env.WEATHER_API}`
+    superagent.get(API)
+        .then(data => {
 
-    //         let weather_description = data.body.data[0].weather.description;
-    //         console.log(weather_description);
+            let weather_description = data.body.data[0];
+            console.log(weather_description);
 
                 
-    //         } );
+            } );
 
+        });
 
-    //     })
 
 
 
