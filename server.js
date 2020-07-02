@@ -10,9 +10,9 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
 const superagent = require('superagent');
-const {
-    request
-} = require('express');
+// const {
+//     request
+// } = require('express');
 
 //------------Celcius to Farenheit Calc----------//
 // function convertToF(celsius) {
