@@ -24,8 +24,7 @@ const {
 
 app.get('/', (request, response) => {
 //     response.send('Hello World...again');
-    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=seattle&format=json`;
-//     ${request.query.city}
+    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
     superagent.get(API)
         .then(data => {
             console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
