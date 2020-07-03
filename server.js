@@ -24,18 +24,6 @@ const superagent = require('superagent');
 
 app.get('/', (request, response) => {
     response.send('Hello World...again');
-//     const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
-//     superagent.get(API)
-//         .then(data => {
-//             console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
-//             let locationData = new Location(data.body[0], request.query.city);
-//             response.status(200).send(locationData);
-//         })
-//         .catch(() => {
-//             response.status(500).send('Something went wrong with your search selection!');
-//         })
-//     response.send('second test for debugging....');
-    
 });
 
 //-------------LOCATION-------------------//
@@ -161,15 +149,11 @@ app.get('/weather', (request, response) => {
     superagent.get(API)
         // .query(queryObject)
         .then(data => {
-            const weatherArray = data.body.data;
-            // console.log('(///////////////////////////////////////////////// line 145 /////////////////////////////////) WeatherArray Console Log: ', weatherArray);
-            weatherArray.forEach(data => {
-                let specificWeatherData = new Weather(data);
-                newWeatherArray.push(specificWeatherData);
-            });
-            response.status(200).send(newWeatherArray);
-            console.log('//////////////////////// line 150 //////////////////////////////////// newWeatherArray: ', newWeatherArray);
-
+            let weatherArray = data.body.data;
+            let dailyForecast = weatherArray.map((data) =>  new Weather(data));
+            response.status(200).send(dailyForecast);
+            // console.log('//////////////////////// line 150 //////////////////////////////////// weatherArray: ', weatherArray);
+            console.log('//////////////////////// line 150 //////////////////////////////////// dailyForecast: ', dailyForecast);
         })
         .catch(() => {
             response.status(500).send('Something is wrong with your Weather Data...')
