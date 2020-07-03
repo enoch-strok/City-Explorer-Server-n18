@@ -162,15 +162,11 @@ app.get('/weather', (request, response) => {
     superagent.get(API)
         // .query(queryObject)
         .then(data => {
-            const weatherArray = data.body.data;
-            // console.log('(///////////////////////////////////////////////// line 145 /////////////////////////////////) WeatherArray Console Log: ', weatherArray);
-            weatherArray.forEach(data => {
-                let specificWeatherData = new Weather(data);
-                newWeatherArray.push(specificWeatherData);
-            });
-            response.status(200).send(newWeatherArray);
-            console.log('//////////////////////// line 150 //////////////////////////////////// newWeatherArray: ', newWeatherArray);
-
+            let weatherArray = data.body.data;
+            let dailyForecast = weatherArray.map((data) =>  new Weather(data));
+            response.status(200).send(dailyForecast);
+            // console.log('//////////////////////// line 150 //////////////////////////////////// weatherArray: ', weatherArray);
+            console.log('//////////////////////// line 150 //////////////////////////////////// dailyForecast: ', dailyForecast);
         })
         .catch(() => {
             response.status(500).send('Something is wrong with your Weather Data...')
