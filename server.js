@@ -190,6 +190,57 @@ function Weather(dataBody) {
 
 // app.put(), app.delete(), app.post()
 
+
+///////////////////////////////////////////// Trails
+
+
+app.get('/trails', (request, response) => {
+    const API = 'https://www.hikingproject.com/data/get-trails'
+    
+    let queryObject = {
+        lat:request.query.latitude,
+        lon:request.query.longitude,
+        key: process.env.TRAIL_API_KEY,
+    };
+
+    superagent.get(API)
+        .query(queryObject)
+        .then(data => {
+            let hikingData = data.body.trails;
+            let hikingArray = hikingData.map((data) =>  new Trails(data));
+            response.status(200).send(hikingArray);
+            console.log('//////////////////////// line 212 //////////////////////////////////// hikingArray: ', hikingArray);
+        })
+        .catch(() => {
+            response.status(500).send('Something is wrong with your Trails search... You basically walked down the wrong trail...')
+        })
+        
+        
+        function Trails(obj) {
+            this.name = obj.name;
+            this.location = obj.location;
+            this.length = obj.length;
+            this.stars = obj.stars;
+            this.star_votes = obj.starVotes;
+            this.summary = obj.summary;
+            this.trail_url = obj.url;
+            this.conditions = obj.conditionDetails;
+            // this.condition_date = Date.parse(obj.conditionDate).toDateString();
+            this.condition_date = new Date(obj.conditionDate.slice(0, 10)).toDateString();
+            this.condition_time = obj.conditionDate.slice(11, 19);
+
+        };
+    })
+        
+
+
+
+
+
+
+
+
+
 app.use('*', (request, response) => {
     response.status(404).send('404: Not sure what you want?');
 });
