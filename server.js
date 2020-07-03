@@ -23,17 +23,17 @@ const superagent = require('superagent');
 //-------------HOME----------------------//
 
 app.get('/', (request, response) => {
-//     response.send('Hello World...again');
-    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
-    superagent.get(API)
-        .then(data => {
-            console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
-            let locationData = new Location(data.body[0], request.query.city);
-            response.status(200).send(locationData);
-        })
-        .catch(() => {
-            response.status(500).send('Something went wrong with your search selection!');
-        })
+    response.send('Hello World...again');
+//     const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+//     superagent.get(API)
+//         .then(data => {
+//             console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
+//             let locationData = new Location(data.body[0], request.query.city);
+//             response.status(200).send(locationData);
+//         })
+//         .catch(() => {
+//             response.status(500).send('Something went wrong with your search selection!');
+//         })
 //     response.send('second test for debugging....');
     
 });
