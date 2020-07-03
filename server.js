@@ -194,8 +194,8 @@ function Weather(dataBody) {
 ///////////////////////////////////////////// Trails
 
 
-app.get('/weather', (request, response) => {
-    const API = `https://www.hikingproject.com/data/get-trails`
+app.get('/trails', (request, response) => {
+    const API = 'https://www.hikingproject.com/data/get-trails'
     
     let queryObject = {
         lat:request.query.latitude,
@@ -207,8 +207,9 @@ app.get('/weather', (request, response) => {
         .query(queryObject)
         .then(data => {
             let hikingData = data.body.trails;
-            response.status(200).send(hikingData);
-            console.log('//////////////////////// line 150 //////////////////////////////////// hikingData: ', hikingData);
+            let hikingArray = hikingData.map((data) =>  new Trails(data));
+            response.status(200).send(hikingArray);
+            console.log('//////////////////////// line 212 //////////////////////////////////// hikingArray: ', hikingArray);
         })
         .catch(() => {
             response.status(500).send('Something is wrong with your Trails search... You basically walked down the wrong trail...')
@@ -219,13 +220,15 @@ app.get('/weather', (request, response) => {
             this.name = obj.name;
             this.location = obj.location;
             this.length = obj.length;
-            this.stars = obj.starts;
+            this.stars = obj.stars;
             this.star_votes = obj.starVotes;
             this.summary = obj.summary;
             this.trail_url = obj.url;
             this.conditions = obj.conditionDetails;
-            this.condition_date = obj.conditionDate;
-            this.condition_time = obj.conditionTime;
+            // this.condition_date = Date.parse(obj.conditionDate).toDateString();
+            this.condition_date = new Date(obj.conditionDate.slice(0, 10)).toDateString();
+            this.condition_time = obj.conditionDate.slice(11, 19);
+
         };
     })
         
