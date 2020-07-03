@@ -190,6 +190,54 @@ function Weather(dataBody) {
 
 // app.put(), app.delete(), app.post()
 
+
+///////////////////////////////////////////// Trails
+
+
+app.get('/weather', (request, response) => {
+    const API = `https://www.hikingproject.com/data/get-trails`
+    
+    let queryObject = {
+        lat:request.query.latitude,
+        lon:request.query.longitude,
+        key: process.env.TRAIL_API_KEY,
+    };
+
+    superagent.get(API)
+        .query(queryObject)
+        .then(data => {
+            let hikingData = data.body.trails;
+            response.status(200).send(hikingData);
+            console.log('//////////////////////// line 150 //////////////////////////////////// hikingData: ', hikingData);
+        })
+        .catch(() => {
+            response.status(500).send('Something is wrong with your Trails search... You basically walked down the wrong trail...')
+        })
+        
+        
+        function Trails(obj) {
+            this.name = obj.name;
+            this.location = obj.location;
+            this.length = obj.length;
+            this.stars = obj.starts;
+            this.star_votes = obj.starVotes;
+            this.summary = obj.summary;
+            this.trail_url = obj.url;
+            this.conditions = obj.conditionDetails;
+            this.condition_date = obj.conditionDate;
+            this.condition_time = obj.conditionTime;
+        };
+    })
+        
+
+
+
+
+
+
+
+
+
 app.use('*', (request, response) => {
     response.status(404).send('404: Not sure what you want?');
 });
