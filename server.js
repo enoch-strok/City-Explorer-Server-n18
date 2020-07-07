@@ -1,6 +1,6 @@
 'use strict';
 
-//////Stopped at 2:57:41 for this project on https://frontrowviews.com/Home/Event/Details/5ec5bbead28f0a0cf8041762  //
+
 
 // dotenv, express, cors
 require('dotenv').config();
@@ -8,6 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
 const pg = require('pg');
+//SQL Videos on https://frontrowviews.com/Home/Event/Play/5ec5bc82d28f0a0cf8044a19 @ 1:57:00
 
 const PORT = process.env.PORT || 3000;
 
@@ -17,27 +18,81 @@ const client = new pg.Client(process.env.DATABASE_URL);
 
 app.use(cors());
 
+
+
+//      _______.  ______      __      
+//     /       | /  __  \    |  |     
+//    |   (----`|  |  |  |   |  |     
+//     \   \    |  |  |  |   |  |     
+// .----)   |   |  `--'  '--.|  `----.
+// |_______/     \_____\_____\_______|
+
+//REMEMBER TO START THE PSQL SERVER BEFORE RUNNING NODEMON/STARTING THE SERVER "PGSTART" IN TERMINAL
 client.connect()
     .then(() => {
         app.listen(PORT, () => {
             console.log(`SQL Server is up on port ${PORT}.`)
-        })
+        });
     })
+    .catch(err => {
+        throw `PG startup error: ${err.message}`;
+    });
 
 ////////////////////////////////////////////// HOME
 app.get('/', (request, response) => {
-    response.send('Hello World...again');
+    response.status(200).send('good to go...');
 });
+
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
 
-// .______   .______       _______     ___       __  ___ 
-// |   _  \  |   _  \     |   ____|   /   \     |  |/  / 
-// |  |_)  | |  |_)  |    |  |__     /  ^  \    |  '  /  
-// |   _  <  |      /     |   __|   /  /_\  \   |    <   
-// |  |_)  | |  |\  \----.|  |____ /  _____  \  |  .  \  
-// |______/  | _| `._____||_______/__/     \__\ |__|\__\ 
-                                                     
+//      _______.  ______      __              ___       _______   _______  
+//     /       | /  __  \    |  |            /   \     |       \ |       \ 
+//    |   (----`|  |  |  |   |  |           /  ^  \    |  .--.  ||  .--.  |
+//     \   \    |  |  |  |   |  |          /  /_\  \   |  |  |  ||  |  |  |
+// .----)   |   |  `--'  '--.|  `----.    /  _____  \  |  '--'  ||  '--'  |
+// |_______/     \_____\_____\_______|   /__/     \__\ |_______/ |_______/ 
+                                                                        
+
+////////////////////////////////////////////// LOCATION
+
+app.get('/add', (request, response) =>{
+    console.log(request.query);
+    // console.log(client.SQL);
+    const firstName = request.query.first_name;
+    const lastName = request.query.last_name;
+    const safeQuery = [firstName, lastName];
+
+
+    const SQL = 'INSERT INTO users (first_name, last_name) VALUES ($1, $2)';
+    const SQLtable = 'SELECT * FROM users;'
+
+    console.log(SQL);
+    console.log(SQLtable);
+
+    client.query(SQL, safeQuery)
+        .then( results => {
+            response.status(200).json(results);
+        })
+        .catch( error => {
+            response.status(500).send(error)
+        });
+})  
+
+app.get('/reply', (request, response) => {
+    const SQL = 'SELECT * from users';
+
+    client.query(SQL)
+        .then( results => {
+            response.status(200).json(results.rows);
+        })
+        .catch( error => {response.status(500).send(error)});
+})  
+
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+
+
+                                                
 
 ////////////////////////////////////////////// LOCATION
 app.get('/location', (request, response) => {
@@ -63,14 +118,13 @@ function Location(obj, citySearch) {
 }
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ LOCATION END
 
-// .______   .______       _______     ___       __  ___ 
-// |   _  \  |   _  \     |   ____|   /   \     |  |/  / 
-// |  |_)  | |  |_)  |    |  |__     /  ^  \    |  '  /  
-// |   _  <  |      /     |   __|   /  /_\  \   |    <   
-// |  |_)  | |  |\  \----.|  |____ /  _____  \  |  .  \  
-// |______/  | _| `._____||_______/__/     \__\ |__|\__\ 
-                                                     
-
+// ____    __    ____  _______     ___   .___________. __    __   _______ .______      
+// \   \  /  \  /   / |   ____|   /   \  |           ||  |  |  | |   ____||   _  \     
+//  \   \/    \/   /  |  |__     /  ^  \ `---|  |----`|  |__|  | |  |__   |  |_)  |    
+//   \            /   |   __|   /  /_\  \    |  |     |   __   | |   __|  |      /     
+//    \    /\    /    |  |____ /  _____  \   |  |     |  |  |  | |  |____ |  |\  \----.
+//     \__/  \__/     |_______/__/     \__\  |__|     |__|  |__| |_______|| _| `._____|
+                                                                                    
 
 ////////////////////////////////////////////// WEATHER
 app.get('/weather', (request, response) => {
@@ -104,15 +158,13 @@ function Weather(dataBody) {
 }
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ WEATHER END
 
-// .______   .______       _______     ___       __  ___ 
-// |   _  \  |   _  \     |   ____|   /   \     |  |/  / 
-// |  |_)  | |  |_)  |    |  |__     /  ^  \    |  '  /  
-// |   _  <  |      /     |   __|   /  /_\  \   |    <   
-// |  |_)  | |  |\  \----.|  |____ /  _____  \  |  .  \  
-// |______/  | _| `._____||_______/__/     \__\ |__|\__\ 
-                                                     
-
-
+// .___________..______          ___       __   __          _______.
+// |           ||   _  \        /   \     |  | |  |        /       |
+// `---|  |----`|  |_)  |      /  ^  \    |  | |  |       |   (----`
+//     |  |     |      /      /  /_\  \   |  | |  |        \   \    
+//     |  |     |  |\  \----./  _____  \  |  | |  `----.----)   |   
+//     |__|     | _| `._____/__/     \__\ |__| |_______|_______/    
+                                                                 
 ////////////////////////////////////////////// TRAILS
 app.get('/trails', (request, response) => {
     const API = 'https://www.hikingproject.com/data/get-trails'
