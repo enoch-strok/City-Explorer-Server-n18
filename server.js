@@ -1,22 +1,31 @@
 'use strict';
 
 
+//SQL Videos on https://frontrowviews.com/Home/Event/Play/5ec5bc82d28f0a0cf8044a19 @ 1:57:00
 
-// dotenv, express, cors
+// dependencies
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
 const pg = require('pg');
-//SQL Videos on https://frontrowviews.com/Home/Event/Play/5ec5bc82d28f0a0cf8044a19 @ 1:57:00
 
+//Define Port
 const PORT = process.env.PORT || 3000;
 
 // Create our App
 const app = express();
 const client = new pg.Client(process.env.DATABASE_URL);
-
 app.use(cors());
+
+////////////////// API Routes
+app.get('/',homePageHandler);
+app.get('/location', locationHandler);
+app.get('/weather', weatherHandler);
+app.get('/trails', trailsHandler);
+
+app.get('/add',SQLaddHandler);
+app.get('/reply',SQLreplyHandler);
 
 
 
@@ -39,9 +48,9 @@ client.connect()
     });
 
 ////////////////////////////////////////////// HOME
-app.get('/', (request, response) => {
+function homePageHandler(request, response) {
     response.status(200).send('good to go...');
-});
+};
 
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
@@ -54,14 +63,14 @@ app.get('/', (request, response) => {
 // |_______/     \_____\_____\_______|   /__/     \__\ |_______/ |_______/ 
                                                                         
 
-////////////////////////////////////////////// LOCATION
+////////////////////////////////////////////// SQL ADD
 
-app.get('/add', (request, response) =>{
+function SQLaddHandler(request, response){
     console.log(request.query);
     // console.log(client.SQL);
     const firstName = request.query.first_name;
     const lastName = request.query.last_name;
-    const safeQuery = [firstName, lastName];
+    const safeQuery = [cityName, lastName];
 
 
     const SQL = 'INSERT INTO users (first_name, last_name) VALUES ($1, $2)';
@@ -77,9 +86,11 @@ app.get('/add', (request, response) =>{
         .catch( error => {
             response.status(500).send(error)
         });
-})  
+};
 
-app.get('/reply', (request, response) => {
+////////////////////////////////////////////// SQL REPLY
+
+function SQLreplyHandler(request, response) {
     const SQL = 'SELECT * from users';
 
     client.query(SQL)
@@ -87,35 +98,86 @@ app.get('/reply', (request, response) => {
             response.status(200).json(results.rows);
         })
         .catch( error => {response.status(500).send(error)});
-})  
+};  
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
 
 
                                                 
 
-////////////////////////////////////////////// LOCATION
-app.get('/location', (request, response) => {
+////////////////////////////////////////////// LOCATION HANDLER SQL
+// Example Lat/Lon for Data Type
+// "lat": "47.6038321", 9 decimals 7 decimals:
+// "lon": "-122.3300624", 10 digits, 7 decimals: numeric(10,5)
+//CREATE TABLE cities (id SERIAL PRIMARY KEY, search_query VARCHAR(255), formatted_query VARCHAR(255), latitude NUMERIC(10,5), longitude NUMERIC(10,5));
+function locationHandler(request, response) {
     console.log('///////////////////////////////////////////////////////////// NEW SEARCH /////////////////////////////////////////////////////////////////////')
-    const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+    const SQL = 'SELECT * FROM cities WHERE search_query = $1';
+    const safeQuery = [request.query.city];
+    
+    client.query(SQL,safeQuery)
+    .then(results => {
+        if(results.rowCount){
+            console.log('Found in Database');
+            response.status(200).send(results.rows[0]);
+        }else{
+            APIlocationHandler(request.query.city, response);
+        }
+    })
+};
 
-    superagent.get(API)
-        .then(data => {
-            console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
-            let locationData = new Location(data.body[0], request.query.city);
-            response.status(200).send(locationData);
-        })
-        .catch(() => {
-            response.status(500).send('Something went wrong with your search selection!');
-        })
-});
+//Cache
+// let locations ={};
 
-function Location(obj, citySearch) {
-    this.latitude = obj.lat;
-    this.longitude = obj.lon;
-    this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
-    this.search_query = citySearch;
-}
+
+////////////////////////////////////////////// LOCATION HANDLER API
+function APIlocationHandler(city, response) {
+    const API = 'https://us1.locationiq.com/v1/search.php';
+    
+    let queryObject = {
+        key: process.env.GEOCODE,
+        q: city,
+        format: 'json'
+    };
+ 
+    console.log('API calling');
+    superagent
+      .get(API)
+      .query(queryObject)
+      .then(data => { 
+        let locationData = new Location(data.body[0], city);
+        cacheLocation(locationData)
+          .then(potato => {
+            response.status(200).send(potato);
+          })
+      })
+      .catch( function(error){
+        console.log(error);
+        response.status(500).send('Something went wrong with Location Data')
+      })
+  }
+  
+  function cacheLocation(city, data){
+    // It's going to write to the database
+    const location = new Location(data[0]);
+    const values = [city, location.formatted_query, location.latitude, location.longitude];
+    const SQL = `INSERT INTO cities (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *`;
+    return client.query(SQL, values)
+      .then(results => {
+        console.log(results);
+        return results.rows[0];
+      })
+  }
+
+      function Location(obj, city) {
+        this.search_query = city;
+        this.formatted_query = obj.display_name;
+        // this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
+        this.latitude = obj.lat;
+        this.longitude = obj.lon;
+    }
+
+
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ LOCATION END
 
 // ____    __    ____  _______     ___   .___________. __    __   _______ .______      
@@ -127,7 +189,7 @@ function Location(obj, citySearch) {
                                                                                     
 
 ////////////////////////////////////////////// WEATHER
-app.get('/weather', (request, response) => {
+function weatherHandler(request, response) {
 
     const lat = request.query.latitude;
     const lon = request.query.longitude;
@@ -148,7 +210,7 @@ app.get('/weather', (request, response) => {
         .catch(() => {
             response.status(500).send('Something is wrong with your Weather Data...')
         })
-})
+};
 
 
 function Weather(dataBody) {
@@ -166,7 +228,7 @@ function Weather(dataBody) {
 //     |__|     | _| `._____/__/     \__\ |__| |_______|_______/    
                                                                  
 ////////////////////////////////////////////// TRAILS
-app.get('/trails', (request, response) => {
+function trailsHandler(request, response) {
     const API = 'https://www.hikingproject.com/data/get-trails'
     
     let queryObject = {
@@ -201,7 +263,7 @@ app.get('/trails', (request, response) => {
             this.condition_date = new Date(obj.conditionDate.slice(0, 10)).toDateString();
             this.condition_time = obj.conditionDate.slice(11, 19);
         };
-    })
+    };
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ TRAILS END
 
 // .______   .______       _______     ___       __  ___ 
@@ -301,3 +363,44 @@ app.listen(PORT, () => console.log('Server is running on port', PORT));
 
 
 // app.put(), app.delete(), app.post()
+
+
+
+////////////////////////////////////////////// OLD LOCATION
+// function locationHandler(request, response) {
+//     console.log('///////////////////////////////////////////////////////////// NEW SEARCH /////////////////////////////////////////////////////////////////////')
+//     const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+
+//     superagent.get(API)
+//         .then(data => {
+//             console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
+//             let locationData = new Location(data.body[0], request.query.city);
+//             response.status(200).send(locationData);
+//         })
+//         .catch(() => {
+//             response.status(500).send('Something went wrong with your search selection!');
+//         })
+// };
+//////////////////////////////////////////////
+
+////////////////////////////////////////////// OLD LOCATION HANDLER API
+// function APIlocationHandler(request, response) {
+//     const API = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE}&q=${request.query.city}&format=json`;
+    
+//         superagent.get(API)
+//             .then(data => {
+//                 console.log('////////////////////////// LINE 32 ///////////////////////// Location Data.Body: ', data.body[0], request.query.city);
+//                 let locationData = new Location(data.body[0], request.query.city);
+//                 response.status(200).send(locationData);
+//             })
+//             .catch(() => {
+//                 response.status(500).send('Something went wrong with your search selection!');
+//             })
+//     };
+    
+//     function Location(obj, citySearch) {
+//         this.latitude = obj.lat;
+//         this.longitude = obj.lon;
+//         this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
+//         this.search_query = citySearch;
+//     }
