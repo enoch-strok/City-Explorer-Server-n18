@@ -112,7 +112,7 @@ function SQLreplyHandler(request, response) {
 //CREATE TABLE cities (id SERIAL PRIMARY KEY, search_query VARCHAR(255), formatted_query VARCHAR(255), latitude NUMERIC(10,5), longitude NUMERIC(10,5));
 function locationHandler(request, response) {
     console.log('///////////////////////////////////////////////////////////// NEW SEARCH /////////////////////////////////////////////////////////////////////')
-    const SQL = 'SELECT * FROM cities WHERE search_query = $1';
+    const SQL = 'SELECT * FROM cities WHERE search_query = $1;';
     const safeQuery = [request.query.city];
     
     client.query(SQL,safeQuery)
@@ -144,8 +144,9 @@ function APIlocationHandler(city, response) {
     superagent
       .get(API)
       .query(queryObject)
-      .then(data => { 
-        let locationData = new Location(data.body[0], city);
+      .then((apiData) => { 
+        console.log('API Request: ',apiData.body[0]);
+        let locationData = new Location(apiData.body[0], city);
         cacheLocation(locationData)
           .then(potato => {
             response.status(200).send(potato);
@@ -157,10 +158,9 @@ function APIlocationHandler(city, response) {
       })
   };
   
-  function cacheLocation(city, data){
+  function cacheLocation(obj){
     // It's going to write to the database
-    const location = new Location(data[0]);
-    const values = [city, location.formatted_query, location.latitude, location.longitude];
+    const values = [obj.search_query, obj.formatted_query, obj.latitude, obj.longitude,];
     const SQL = `INSERT INTO cities (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *`;
     return client.query(SQL, values)
       .then(results => {
@@ -170,11 +170,11 @@ function APIlocationHandler(city, response) {
   };
 
       function Location(obj, city) {
-        this.search_query = city;
-        this.formatted_query = obj.display_name;
-        // this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
-        this.latitude = obj.lat;
-        this.longitude = obj.lon;
+          this.formatted_query = obj.display_name;
+          // this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
+          this.latitude = obj.lat;
+          this.longitude = obj.lon;
+          this.search_query = city;
     };
 
 
