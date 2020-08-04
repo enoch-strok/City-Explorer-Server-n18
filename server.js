@@ -286,7 +286,7 @@ app.use((error, request, response, next) => {
     response.status(500).send('500: Minions broke the server somehow...');
 });
 
-app.listen(PORT, () => console.log('Server is running on port', PORT));
+// app.listen(PORT, () => console.log('Server is running on port', PORT));
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
