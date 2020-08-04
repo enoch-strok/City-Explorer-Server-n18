@@ -24,6 +24,7 @@ app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
 app.get('/trails', trailsHandler);
 app.get('/movies', moviesHandler);
+app.get('/yelp', yelpHandler);
 
 app.get('/add',SQLaddHandler);
 app.get('/reply',SQLreplyHandler);
@@ -292,7 +293,7 @@ function moviesHandler(request, response) {
         response.status(200).send(moviesArr);
       })
       .catch(() => response.status(500).send('Something wrong with MOVIES route'));
-  }
+  };
   
   function Movies(obj) {
     this.title = obj.title;
@@ -302,7 +303,7 @@ function moviesHandler(request, response) {
     this.image_url = `https://image.tmdb.org/t/p/w500${obj.poster_path}`;
     this.popularity = obj.popularity;
     this.released_on = obj.release_date;
-  }
+  };
 
   //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ MOVIES END
 
@@ -313,6 +314,39 @@ function moviesHandler(request, response) {
 // |  |_)  | |  |\  \----.|  |____ /  _____  \  |  .  \  
 // |______/  | _| `._____||_______/__/     \__\ |__|\__\ 
                                                      
+////////////////////////////////////////////// YELP
+function yelpHandler(request, response) {
+    let API = 'https://api.yelp.com/v3/businesses/search';
+    let queryObj = {
+      term: 'restaurants',
+      latitude: request.query.latitude,
+      longitude: request.query.longitude,
+      limit: 5,
+      offset: (request.query.page - 1) * 5
+    };
+  
+    superagent
+      .get(API)
+      .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+      .query(queryObj)
+      .then((apiData) => {
+        console.log('First console log from request', request.query);
+        let restaurantArr = apiData.body.businesses.map(restaurant => new Restaurants(restaurant));
+        response.status(200).send(restaurantArr);
+      })
+      .catch(() => response.status(500).send('Something wrong with YELP route'));
+  };
+  
+  function Restaurants(obj) {
+    this.name = obj.name;
+    this.image_url = obj.image_url;
+    this.price = obj.price;
+    this.rating = obj.rating;
+    this.url = obj.url;
+  };
+
+  //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ YELP END
+
 
 ////////////////////////////////////////////// 
 
