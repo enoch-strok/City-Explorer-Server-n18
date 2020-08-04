@@ -155,7 +155,7 @@ function APIlocationHandler(city, response) {
         console.log(error);
         response.status(500).send('Something went wrong with Location Data')
       })
-  }
+  };
   
   function cacheLocation(city, data){
     // It's going to write to the database
@@ -167,7 +167,7 @@ function APIlocationHandler(city, response) {
         console.log(results);
         return results.rows[0];
       })
-  }
+  };
 
       function Location(obj, city) {
         this.search_query = city;
@@ -175,7 +175,7 @@ function APIlocationHandler(city, response) {
         // this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
         this.latitude = obj.lat;
         this.longitude = obj.lon;
-    }
+    };
 
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ LOCATION END
@@ -202,6 +202,8 @@ function weatherHandler(request, response) {
         // .query(queryObject)
         .then(data => {
             let weatherArray = data.body.data;
+            //book weatherArray is bookItems
+            //let bookItems = data.body.items;
             let dailyForecast = weatherArray.map((data) =>  new Weather(data));
             response.status(200).send(dailyForecast);
             // console.log('//////////////////////// line 150 //////////////////////////////////// weatherArray: ', weatherArray);
@@ -216,7 +218,6 @@ function weatherHandler(request, response) {
 function Weather(dataBody) {
     this.time = new Date(dataBody.datetime).toDateString();
     this.forecast = dataBody.weather.description;
-
 }
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ WEATHER END
 
@@ -297,7 +298,7 @@ app.listen(PORT, () => console.log('Server is running on port', PORT));
 // |  |_)  | |  |\  \----.|  |____ /  _____  \  |  .  \  
 // |______/  | _| `._____||_______/__/     \__\ |__|\__\ 
         
-
+/////////////////////// OLD CODE SAVED FOR EXAMPLES ///////////////////////
 //------------Celcius to Farenheit Calc----------//
 // function convertToF(celsius) {
 //     return celsius * 9/5 + 32;
@@ -404,3 +405,4 @@ app.listen(PORT, () => console.log('Server is running on port', PORT));
 //         this.formatted_query = obj.display_name + '           ---           ' + ' Lat: ' + obj.lat + ' Lon: ' + obj.lon;
 //         this.search_query = citySearch;
 //     }
+//////
