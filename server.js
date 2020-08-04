@@ -23,6 +23,7 @@ app.get('/',homePageHandler);
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
 app.get('/trails', trailsHandler);
+app.get('/movies', moviesHandler);
 
 app.get('/add',SQLaddHandler);
 app.get('/reply',SQLreplyHandler);
@@ -266,6 +267,44 @@ function trailsHandler(request, response) {
         };
     };
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ TRAILS END
+
+// .______   .______       _______     ___       __  ___ 
+// |   _  \  |   _  \     |   ____|   /   \     |  |/  / 
+// |  |_)  | |  |_)  |    |  |__     /  ^  \    |  '  /  
+// |   _  <  |      /     |   __|   /  /_\  \   |    <   
+// |  |_)  | |  |\  \----.|  |____ /  _____  \  |  .  \  
+// |______/  | _| `._____||_______/__/     \__\ |__|\__\ 
+
+
+////////////////////////////////////////////// MOVIES
+function moviesHandler(request, response) {
+    const API = 'https://api.themoviedb.org/3/search/movie';
+    let queryObj = {
+      query: request.query.search_query,
+      api_key: process.env.MOVIE_API_KEY
+    };
+  
+    superagent
+      .get(API)
+      .query(queryObj)
+      .then(apiData => {
+        let moviesArr = apiData.body.results.map(movies => new Movies(movies));
+        response.status(200).send(moviesArr);
+      })
+      .catch(() => response.status(500).send('Something wrong with MOVIES route'));
+  }
+  
+  function Movies(obj) {
+    this.title = obj.title;
+    this.overview = obj.overview;
+    this.average_votes = obj.vote_average;
+    this.total_votes = obj.vote_count;
+    this.image_url = `https://image.tmdb.org/t/p/w500${obj.poster_path}`;
+    this.popularity = obj.popularity;
+    this.released_on = obj.release_date;
+  }
+
+  //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ MOVIES END
 
 // .______   .______       _______     ___       __  ___ 
 // |   _  \  |   _  \     |   ____|   /   \     |  |/  / 
